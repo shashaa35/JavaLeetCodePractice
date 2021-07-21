@@ -1,6 +1,15 @@
 package leetcode;
 
 //https://leetcode.com/problems/push-dominoes/
+
+/**
+ * Here is a worked example on the string S = 'R.R...L':
+ * We find the force going from left to right is [7, 6, 7, 6, 5, 4, 0].
+ * The force going from right to left is [0, 0, 0, -4, -5, -6, -7].
+ * Combining them (taking their vector addition),
+ * the combined force is [7, 6, 7, 2, 0, -2, -7],
+ * for a final answer of RRRR.LL.
+ */
 public class PushDominoes {
     public static void main(String[] args) {
         PushDominoes obj = new PushDominoes();
@@ -9,40 +18,32 @@ public class PushDominoes {
         System.out.println(obj.pushDominoes(new String(".L.R...LR..L..")));
     }
 
-    public String pushDominoes(String dominoes) {
-        int change = 1;
-        char[] s = dominoes.toCharArray();
-        char[] temp = new char[s.length];
-//        System.out.println(s);
-        while (change>0) {
-            change = 0;
-            temp = s.clone();
-            //for R dominoes
-            for (int i = 0; i < s.length-1; i++) {
-                if (s[i] == 'R' && s[i+1] == '.') {
-                    if (i+2 == s.length || s[i+2] != 'L') {
-                        //XXXR. , XXXR.L , XXXR.R , XXXR.....
-                        temp[i+1] = 'R';
-                        change++;
-                        i++;
-                    }
-                }
-            }
-//            System.out.println(s);
-            // for L dominos
-            for (int i = s.length-1; i > 0; i--) {
-                if (s[i] == 'L' && s[i-1] == '.') {
-                    if (i-2 == -1 || s[i-2] != 'R') {
-                        //.L, XXXR.LXXX, XXXL.LXXX, XXX.LXXX
-                        temp[i-1] = 'L';
-                        change++;
-                        i--;
-                    }
-                }
-            }
-            s = temp.clone();
-//            System.out.println(s);
+    public String pushDominoes(String S) {
+        char[] A = S.toCharArray();
+        int N = A.length;
+        int[] forces = new int[N];
+
+        // Populate forces going from left to right
+        int force = 0;
+        for (int i = 0; i < N; ++i) {
+            if (A[i] == 'R') force = N;
+            else if (A[i] == 'L') force = 0;
+            else force = Math.max(force - 1, 0);
+            forces[i] += force;
         }
-        return String.valueOf(s);
+
+        // Populate forces going from right to left
+        force = 0;
+        for (int i = N - 1; i >= 0; --i) {
+            if (A[i] == 'L') force = N;
+            else if (A[i] == 'R') force = 0;
+            else force = Math.max(force - 1, 0);
+            forces[i] -= force;
+        }
+
+        StringBuilder ans = new StringBuilder();
+        for (int f : forces)
+            ans.append(f > 0 ? 'R' : f < 0 ? 'L' : '.');
+        return ans.toString();
     }
 }
