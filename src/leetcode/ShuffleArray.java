@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+//https://leetcode.com/problems/shuffle-an-array/
 public class ShuffleArray {
     int [] arr;
     Random r;
