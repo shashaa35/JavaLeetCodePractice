@@ -13,7 +13,7 @@ public class WordLadder2 {
     int curLadderSize;
     List<List<String>> listOfAns;
     int minLadderSize;
-    Map<String , List<String>> map;
+    Map<String, List<String>> map;
     Map<String, Integer> indexMap;
     String beginWord;
 
@@ -79,21 +79,21 @@ public class WordLadder2 {
         map = new HashMap<>();
         indexMap = new HashMap<>();
         map.put(beginWord, new ArrayList<>());
-        for (int i = 0;i<wordList.size();i++) {
+        for (int i = 0; i < wordList.size(); i++) {
             map.put(wordList.get(i), new ArrayList<>());
             indexMap.put(wordList.get(i), i);
         }
 
-        for (int j =0;j<wordList.size();j++) {
+        for (int j = 0; j < wordList.size(); j++) {
             String b = wordList.get(j);
             if (isAtOneDistance(beginWord, b)) {
                 map.get(beginWord).add(b);
             }
         }
 
-        for (int i = 0;i < wordList.size()-1;i++) {
+        for (int i = 0; i < wordList.size() - 1; i++) {
             String a = wordList.get(i);
-            for (int j = i+1;j<wordList.size();j++) {
+            for (int j = i + 1; j < wordList.size(); j++) {
                 String b = wordList.get(j);
                 if (isAtOneDistance(a, b)) {
                     map.get(a).add(b);
