@@ -1,147 +1,165 @@
 package leetcode;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //https://leetcode.com/problems/word-ladder-ii/
 public class WordLadder2 {
-    int ansTillNow[];
-    boolean wordSelected[];
-    int curLadderSize;
-    List<List<String>> listOfAns;
-    int minLadderSize;
-    Map<String, List<String>> map;
-    Map<String, Integer> indexMap;
-    String beginWord;
+
 
     public static void main(String[] args) {
         WordLadder2 obj = new WordLadder2();
-//        System.out.println(obj.isAtOneDistance("hot", "hit"));
-//        System.out.println(obj.isAtOneDistance("hot", "sait"));
-//        System.out.println(obj.isAtOneDistance("hot", "sit"));
-//        System.out.println(obj.isAtOneDistance("hot", "hot"));
 //        System.out.println(obj.findLadders("hit", "cog", Arrays.asList("hot", "dot", "dog", "lot", "log")));
 //        System.out.println(obj.findLadders("hit", "cog", Arrays.asList("hot", "dot", "dog", "lot", "log", "cog")));
+//        System.out.println(obj.findLadders("hot", "dog", Arrays.asList("hot", "dog", "dot")));
+//        System.out.println(obj.findLadders("a", "c", Arrays.asList("a","b","c")));
         System.out.println(obj.findLadders("qa", "sq", Arrays.asList("si", "go", "se", "cm", "so", "ph", "mt", "db", "mb", "sb", "kr", "ln", "tm", "le", "av", "sm", "ar", "ci", "ca", "br", "ti", "ba", "to", "ra", "fa", "yo", "ow", "sn", "ya", "cr", "po", "fe", "ho", "ma", "re", "or", "rn", "au", "ur", "rh", "sr", "tc", "lt", "lo", "as", "fr", "nb", "yb", "if", "pb", "ge", "th", "pm", "rb", "sh", "co", "ga", "li", "ha", "hz", "no", "bi", "di", "hi", "qa", "pi", "os", "uh", "wm", "an", "me", "mo", "na", "la", "st", "er", "sc", "ne", "mn", "mi", "am", "ex", "pt", "io", "be", "fm", "ta", "tb", "ni", "mr", "pa", "he", "lr", "sq", "ye")));
     }
 
-    private boolean isAtOneDistance(String w1, String w2) {
-        if (w1.length() != w2.length())
-            return false;
-        int count = 0;
-        for (int i = 0; i < w1.length(); i++) {
-            if (w1.charAt(i) != w2.charAt(i)) {
-                count++;
+    Map<String, List<String>> adjList = new HashMap<String, List<String>>();
+    List<String> currPath = new ArrayList<String>();
+    List<List<String>> shortestPaths = new ArrayList<List<String>>();
+
+    private List<String> findNeighbors(String word, Set<String> wordList) {
+        List<String> neighbors = new ArrayList<String>();
+        char charList[] = word.toCharArray();
+
+        for (int i = 0; i < word.length(); i++) {
+            char oldChar = charList[i];
+
+            // replace the i-th character with all letters from a to z except the original character
+            for (char c = 'a'; c <= 'z'; c++) {
+                charList[i] = c;
+
+                // skip if the character is same as original or if the word is not present in the wordList
+                if (c == oldChar || !wordList.contains(String.valueOf(charList))) {
+                    continue;
+                }
+                neighbors.add(String.valueOf(charList));
             }
-            if (count > 1)
-                return false;
+            charList[i] = oldChar;
         }
-        if (count == 1)
-            return true;
-        return false;
+        return neighbors;
     }
 
-    private void printLadder(List<String> wordList) {
-        System.out.println("Ans length is " + curLadderSize);
-        for (int i = 0; i < ansTillNow.length && ansTillNow[i] != -1; i++) {
-            System.out.printf("%s ", wordList.get(ansTillNow[i]));
+    private void backtrack(String source, String destination) {
+        //System.out.printlen(source);
+        // store the path if we reached the endWord
+        if (source.equals(destination)) {
+            List<String> tempPath = new ArrayList<String>(currPath);
+            shortestPaths.add(tempPath);
         }
-        System.out.println();
-    }
 
-    private void saveLadder(List<String> wordList) {
-        if (curLadderSize > minLadderSize) {
+        if (!adjList.containsKey(source)) {
             return;
         }
 
-        List<String> ladder = new ArrayList<>();
-        ladder.add(beginWord);
-        for (int i = 0; i < ansTillNow.length && ansTillNow[i] != -1; i++) {
-            ladder.add(wordList.get(ansTillNow[i]));
-        }
-
-        if (curLadderSize == minLadderSize) {
-            //add this ladder
-            listOfAns.add(ladder);
-        }
-
-        if (curLadderSize < minLadderSize) {
-            minLadderSize = curLadderSize;
-            listOfAns.clear();
-            listOfAns.add(ladder);
+        for (int i = 0; i < adjList.get(source).size(); i++) {
+            currPath.add(adjList.get(source).get(i));
+            backtrack(adjList.get(source).get(i), destination);
+            currPath.remove(currPath.size() - 1);
         }
     }
 
-    private void populateMap(List<String> wordList) {
-        map = new HashMap<>();
-        indexMap = new HashMap<>();
-        map.put(beginWord, new ArrayList<>());
-        for (int i = 0; i < wordList.size(); i++) {
-            map.put(wordList.get(i), new ArrayList<>());
-            indexMap.put(wordList.get(i), i);
-        }
-
-        for (int j = 0; j < wordList.size(); j++) {
-            String b = wordList.get(j);
-            if (isAtOneDistance(beginWord, b)) {
-                map.get(beginWord).add(b);
+    private void swap(Set<String> forward, Set<String> backward) {
+        Set<String> temp = forward;
+        forward = backward;
+        backward = temp;
+    }
+    private void addEdge(String word1, String word2, int direction) {
+        if(direction == 1) {
+            if (!adjList.containsKey(word1)) {
+                adjList.put(word1, new ArrayList<String>());
             }
+            adjList.get(word1).add(word2);
+        } else {
+            if (!adjList.containsKey(word2)) {
+                adjList.put(word2, new ArrayList<String>());
+            }
+            adjList.get(word2).add(word1);
+        }
+    }
+
+    private boolean bfs(String beginWord, String endWord, Set<String> wordList) {
+        if (wordList.contains(endWord) == false) {
+            return false;
         }
 
-        for (int i = 0; i < wordList.size() - 1; i++) {
-            String a = wordList.get(i);
-            for (int j = i + 1; j < wordList.size(); j++) {
-                String b = wordList.get(j);
-                if (isAtOneDistance(a, b)) {
-                    map.get(a).add(b);
-                    map.get(b).add(a);
+        // remove the root word which is the first layer
+        if (wordList.contains(beginWord)) {
+            wordList.remove(beginWord);
+        }
+
+        Set<String> forwardQueue =  new HashSet<String>();
+        Set<String> backwardQueue = new HashSet<String>();
+
+        forwardQueue.add(beginWord);
+        backwardQueue.add(endWord);
+
+        boolean found = false;
+        int direction = 1;
+
+        while (forwardQueue.isEmpty() != true)  {
+            // visited will store the words of current layer
+            Set<String> visited = new HashSet<String>();
+
+            // swap the queues because we are always extending the forwardQueue
+            if (forwardQueue.size() > backwardQueue.size()) {
+                Set<String> temp = forwardQueue;
+                forwardQueue = backwardQueue;
+                backwardQueue = temp;
+                direction ^= 1;
+            }
+
+            for (String currWord : forwardQueue) {
+                List<String> neighbors = findNeighbors(currWord, wordList);
+                for (String word : neighbors) {
+
+                    // if the backwardQueue already contains it we can stop after completing this level
+                    if (backwardQueue.contains(word)) {
+                        found = true;
+                        addEdge(currWord, word, direction);
+                    }
+
+                 /* the word shouldn't be presnt in forwardQueue because if it is then the edge will
+                 be between two words at the same level which we don't want */
+                    else if (!found && wordList.contains(word) == true && forwardQueue.contains(word) == false) {
+                        visited.add(word);
+                        addEdge(currWord, word, direction);
+                    }
                 }
             }
-        }
-    }
 
-    private void checkAndReturn(String beginWord, String endWord, List<String> wordList) {
-//        printLadder(wordList);
-        if (beginWord.equals(endWord)) {
-            saveLadder(wordList);
-            printLadder(wordList);
-            return;
-        }
-
-        if (curLadderSize > minLadderSize) {
-            return;
-        }
-
-        List<String> listOfWordsReachable = map.get(beginWord);
-        for (int i = 0; i < listOfWordsReachable.size(); i++) {
-            String word = listOfWordsReachable.get(i);
-            int indexOfWord = indexMap.get(word);
-            if (!wordSelected[indexOfWord]) {
-                ansTillNow[curLadderSize] = indexOfWord;
-                curLadderSize++;
-                wordSelected[indexOfWord] = true;
-                checkAndReturn(word, endWord, wordList);
-                curLadderSize--;
-                ansTillNow[curLadderSize] = -1;
-                wordSelected[indexOfWord] = false;
+            // removing the words of the previous layer
+            for (String currWord : forwardQueue) {
+                if (wordList.contains(currWord)) {
+                    wordList.remove(currWord);
+                }
             }
+
+            if (found) {
+                break;
+            }
+
+            forwardQueue = visited;
         }
+        return found;
     }
 
     public List<List<String>> findLadders(String beginWord, String endWord, List<String> wordList) {
-        if (!wordList.contains(endWord)) return new ArrayList<List<String>>();
-        ansTillNow = new int[wordList.size()];
-        Arrays.fill(ansTillNow, -1);
-        curLadderSize = 0;
-        wordSelected = new boolean[wordList.size()];
-        listOfAns = new ArrayList<List<String>>();
-        minLadderSize = wordList.size() + 1;
-        this.beginWord = beginWord;
-        populateMap(wordList);
-        checkAndReturn(beginWord, endWord, wordList);
-        return listOfAns;
+        // copying the words into the set for efficient deletion in BFS
+        Set<String> copiedWordList = new HashSet<>(wordList);
+        // build the DAG using BFS
+        boolean sequence_found = bfs(beginWord, endWord, copiedWordList);
+
+        // There is no valid sequence that connects `beginWord` to `endWord`
+        if (sequence_found == false) {
+            return shortestPaths;
+        }
+        // every path will start from the beginWord
+        currPath.add(beginWord);
+        // traverse the DAG to find all the paths between beginWord and endWord
+        backtrack(beginWord, endWord);
+
+        return shortestPaths;
     }
 }
