@@ -18,7 +18,6 @@ public class PalindromePartition2 {
 					palindrome, else false
 		Note that C[i][j] is 0 if P[i][j] is
 		true */
-        int[][] C = new int[n][n];
         boolean[][] P = new boolean[n][n];
 
         int i, j, k, gap; // different looping variables
@@ -33,26 +32,25 @@ public class PalindromePartition2 {
             }
         }
 
-        for (gap = 0; gap < n; gap++) {
-            for (i = 0, j = gap; j < n; i++, j++) {
-                if (P[i][j]) {
-                    C[i][j] = 0;
-                } else {
-                    int min = Integer.MAX_VALUE;
-                    for (k = i;k<j;k++) {
-                        int left = C[i][k];
-                        int right = C[k+1][j];
-                        if (left + right + 1 < min) {
-                            min = left + right + 1;
-                        }
+        int C[] = new int[n];
+        C[0] = 0;
+        for (j = 1; j < n;j++) {
+            if(P[0][j]) {
+                C[j] = 0;
+            } else {
+                int min = Integer.MAX_VALUE;
+                for (i=j;i>=1;i--) {
+                    if (P[i][j]) {
+                        if (C[i-1] < min)
+                            min = C[i-1];
                     }
-                    C[i][j] = min;
                 }
-
+                C[j] = min+1;
             }
+
         }
 
-        return C[0][n - 1];
+        return C[n - 1];
     }
 
     public static void main(String[] args) {
