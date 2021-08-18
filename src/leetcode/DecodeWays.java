@@ -1,34 +1,22 @@
 package leetcode;
 
 //https://leetcode.com/problems/decode-ways/
-//https://www.youtube.com/watch?v=YcJTyrG3bZs
-//
+//https://youtu.be/cQX3yHS0cLo
+//Iterative DP
 public class DecodeWays {
-    Integer[] memo;
     public int numDecodings(String s) {
-        memo = new Integer[s.length()];
-        return numDecodings(s, 0);
-    }
-
-    private int numDecodings(String s, int index) {
-        if (index == s.length())
-            return 1;
-
-        if (s.charAt(index) == '0')
-            return 0;
-
-        if (memo[index] != null)
-            return memo[index];
-
-        int ways1 = numDecodings(s, index + 1);
-        int ways2 = 0;
-        if (index + 2 <= s.length()) {
-            int nextNumber = Integer.parseInt(s.substring(index, index + 2));
-            if (nextNumber <= 26)
-                ways2 = numDecodings(s, index + 2);
+        int dp[] = new int[s.length()+1];
+        dp[0] = 1;
+        dp[1] = s.charAt(0) == '0' ? 0 : 1;
+        for (int i =2;i<=s.length();i++){
+            int oneDigit = Integer.parseInt(s.substring(i-1, i));
+            int twoDigit = Integer.parseInt(s.substring(i-2, i));
+            if (oneDigit >= 1)
+                dp[i] += dp[i-1];
+            if (twoDigit >=10 && twoDigit<=26)
+                dp[i] += dp[i-2];
         }
-        memo[index] = ways1 + ways2;
-        return ways1 + ways2;
+        return dp[s.length()];
     }
 
     public static void main(String[] args) {
