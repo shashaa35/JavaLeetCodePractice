@@ -1,5 +1,7 @@
 package leetcode;
 
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Stack;
 
 public class QueueUsingStacks {
@@ -9,6 +11,7 @@ public class QueueUsingStacks {
         public MyQueue() {
             pushStack = new Stack<>();
             popStack = new Stack<>();
+            Queue<Integer> q = new LinkedList<>();
         }
 
         /** Push element x to the back of queue. */
